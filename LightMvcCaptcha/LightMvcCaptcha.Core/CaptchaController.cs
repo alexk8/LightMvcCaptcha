@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,12 +13,18 @@ namespace LightMvcCaptcha.Core
     {
         public FileStreamResult GetCaptcha()
         {
-            using (var captcha = Captcha.Generate())
-            {
-                Session["CAPTCHA"] = captcha;
+            var captcha = Captcha.Generate();
 
-                return new FileStreamResult(captcha.ImageStream, "image/jpeg");
-            }
+            Session["CAPTCHA"] = captcha;
+
+            MemoryStream ms = new MemoryStream();
+            captcha.Image.Save(ms, ImageFormat.Jpeg);
+
+            captcha.Image.Dispose();
+
+            ms.Position = 0;
+
+            return new FileStreamResult(ms, "image/jpeg");
         }
     }
 }

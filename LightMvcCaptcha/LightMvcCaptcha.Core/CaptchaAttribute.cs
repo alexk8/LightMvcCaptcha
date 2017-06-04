@@ -20,8 +20,12 @@ namespace LightMvcCaptcha.Core
         {
             string key = value as string;
             Captcha captcha = HttpContext.Current.Session["CAPTCHA"] as Captcha;
-            
-            return key != null && captcha != null && captcha.Key == key.ToUpper();
+
+            bool result = key != null && captcha != null && captcha.Key == key.ToUpper();
+
+            HttpContext.Current.Session["CAPTCHA"] = null;
+
+            return result;
         }
     }
 }

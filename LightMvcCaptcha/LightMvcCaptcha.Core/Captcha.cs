@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace LightMvcCaptcha.Core
 {
-    public class Captcha : IDisposable
+    public class Captcha
     {
         public static Font Font { get; set; } = new Font("Lucida Console", 60);
         public static string Chars { get; set; } = "WERTUPASDFGHKLZXCVBNM123456789";
@@ -18,23 +18,16 @@ namespace LightMvcCaptcha.Core
         private static readonly Random random = new Random();
 
 
-        public MemoryStream ImageStream { get; }
-        public Size ImageSize { get; }
+        public Bitmap Image { get; }
+        public Size Size { get; }
         public string Key { get; }
 
-        private Captcha(MemoryStream stream, Size size, string key)
+        private Captcha(Bitmap img, Size size, string key)
         {
-            ImageStream = stream;
-            ImageSize = size;
+            Image = img;
+            Size = size;
             Key = key;
         }
-
-        public void Dispose()
-        {
-            ImageStream.Dispose();
-        }
-
-
 
         /// <summary>
         /// Generates a CAPTCHA image
@@ -56,10 +49,7 @@ namespace LightMvcCaptcha.Core
             var size = new Size(bmp.Width, bmp.Height);
             var ms = new MemoryStream();
 
-            bmp.Save(ms, ImageFormat.Jpeg);
-            bmp.Dispose();
-
-            return new Captcha(ms, size, key);
+            return new Captcha(bmp, size, key);
         }
 
         private static Bitmap WaveTransform(Bitmap img)

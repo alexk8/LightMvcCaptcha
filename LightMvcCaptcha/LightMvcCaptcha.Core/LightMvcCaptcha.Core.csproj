@@ -74,6 +74,7 @@
     <Compile Include="Captcha.cs" />
     <Compile Include="CaptchaAttribute.cs" />
     <Compile Include="CaptchaController.cs" />
+    <Compile Include="CaptchaExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

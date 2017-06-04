@@ -1,0 +1,28 @@
+﻿@using LightMvcCaptcha.Core
+@model LightMvcCaptcha.Web.ViewModels.CaptchaViewModel
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Captcha Test</title>
+</head>
+<body>
+    <h2>Solve it</h2>
+
+    @using (Html.BeginForm())
+    {
+        <div>
+            @Html.CaptchaFor(x => x.Captcha)
+            @Html.ValidationMessageFor(x => x.Captcha);
+        </div>
+    
+        <div>
+            @Html.TextBoxFor(x => x.Captcha)
+        </div>
+
+        <input type="submit" value="submit" />
+    }
+</body>
+</html>
