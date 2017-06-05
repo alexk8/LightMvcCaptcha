@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 using System.Web.Mvc;
 
 namespace LightMvcCaptcha.Core
@@ -22,7 +23,13 @@ namespace LightMvcCaptcha.Core
 
             captcha.Image.Dispose();
 
-            ms.Position = 0;
+            ms.Seek(0, SeekOrigin.Begin);
+
+            Response.Cache.SetExpires(DateTime.UtcNow.AddDays(-1));
+            Response.Cache.SetValidUntilExpires(false);
+            Response.Cache.SetRevalidation(HttpCacheRevalidation.AllCaches);
+            Response.Cache.SetCacheability(HttpCacheability.NoCache);
+            Response.Cache.SetNoStore();
 
             return new FileStreamResult(ms, "image/jpeg");
         }

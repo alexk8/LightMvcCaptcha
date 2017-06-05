@@ -21,7 +21,7 @@ namespace LightMvcCaptcha.Core
             string key = value as string;
             Captcha captcha = HttpContext.Current.Session["CAPTCHA"] as Captcha;
 
-            bool result = key != null && captcha != null && captcha.Key == key.ToUpper();
+            bool result = key != null && captcha != null && string.Equals(captcha.Key, key, Captcha.Comparison);
 
             HttpContext.Current.Session["CAPTCHA"] = null;
 

@@ -46,6 +46,7 @@ namespace LightMvcCaptcha.Core
 
             if (htmlAttributes != null) tag.MergeAttributes(new RouteValueDictionary(htmlAttributes));
             tag.Attributes.Add("src", url);
+            tag.Attributes.Add("onclick", "this.src+=''");
 
             return MvcHtmlString.Create(tag.ToString(TagRenderMode.SelfClosing));
         }
