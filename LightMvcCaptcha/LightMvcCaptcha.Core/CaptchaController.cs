@@ -8,7 +8,7 @@ namespace LightMvcCaptcha.Core
 {
     public abstract class CaptchaController : Controller
     {
-        public FileStreamResult GetCaptcha()
+        public virtual FileStreamResult GetCaptcha()
         {
             var captcha = Captcha.Generate();
 

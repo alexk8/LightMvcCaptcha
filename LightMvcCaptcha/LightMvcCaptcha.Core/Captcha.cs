@@ -137,7 +137,7 @@ namespace LightMvcCaptcha.Core
         {
             string key = GetRandomString(chars, length);
 
-            Bitmap captcha = new Bitmap((int)(key.Length * charsSpacing * 1.15f), (int)(font.Size * 1.2f));
+            Bitmap captcha = new Bitmap((int)(key.Length * charsSpacing * 1.15f), CalculateHeight(font, chars));
 
             CreateDigits(captcha, key, font, charsSpacing, maxRotationAngle);
 
@@ -153,6 +153,17 @@ namespace LightMvcCaptcha.Core
             var size = new Size(captcha.Width, captcha.Height);
 
             return new Captcha(captcha, size, key);
+        }
+
+        private static int CalculateHeight(Font font, string text)
+        {
+            using (var image = new Bitmap(1, 1))
+            {
+                using (var g = Graphics.FromImage(image))
+                {
+                    return (int)g.MeasureString(text, font).Height;
+                }
+            }
         }
 
         private static void WaveTransform(ref Bitmap img, uint waveDistortionPeriod, uint waveDistortionAmplitude)

@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
+using System.Web;
 using System.Web.Mvc;
 using LightMvcCaptcha.Core;
 using LightMvcCaptcha.Web.ViewModels;
@@ -8,55 +11,70 @@ namespace LightMvcCaptcha.Web.Controllers
 {
     public class HomeController : CaptchaController
     {
-        // GET: Home
+        private CaptchaViewModel captchaViewModel
+        {
+            get
+            {
+                var cpt = Session["captchaViewModel"] as CaptchaViewModel;
+                if (cpt == null)
+                    Session["captchaViewModel"] = cpt = new CaptchaViewModel();
+                return cpt;
+            }
+            set { Session["captchaViewModel"] = value; }
+        }
+
+
         public ActionResult Index()
         {
-            return View(new CaptchaViewModel());
+            return View(captchaViewModel);
         }
 
         [HttpPost]
         public ActionResult Index(CaptchaViewModel model)
         {
-            try
-            {
-                Captcha.Font = new Font(Captcha.Font.FontFamily, model.FontSize);
-                Captcha.Chars = model.Chars;
-                Captcha.Length = model.Length;
-                Captcha.CharsSpacing = model.CharsSpacing;
-                Captcha.MaxRotationAngle = model.MaxRotationAngle;
-                Captcha.WaveDistortionAmplitude = model.WaveDistortionAmplitude;
-                Captcha.WaveDistortionPeriod = model.WaveDistortionPeriod;
-                Captcha.LineNoiseCount = model.LineNoiseCount;
-                Captcha.WaveDistortionEnabled = model.WaveDistortionEnabled;
-                Captcha.LineNoiseEnabled = model.LineNoiseEnabled;
+            Font font = new Font(model.FontFamily, model.FontSize); // forcing creating default font if FontFamily is not correct
+            model.FontFamily = font.FontFamily.Name;
+            captchaViewModel = model;
 
-                if (ModelState.IsValid)
-                {
-                    ViewBag.Answer = "Correct! " + model.Captcha;
-                    return View(new CaptchaViewModel());
-                }
-            }
-            catch(Exception e)
+            if (ModelState.IsValid)
             {
-                ViewBag.Answer = "Error: " + e.Message;
+                ViewBag.Answer = "Correct! " + model.Captcha;
             }
-            return View(model);
+
+            return RedirectToAction("Index");
         }
 
         public ActionResult Reset()
         {
-            Captcha.Font = new Font("Lucida Console", 60);
-            Captcha.Chars = "WERTUPASDFGHKLZXCVBNM123456789";
-            Captcha.Length = 6;
-            Captcha.CharsSpacing = 48;
-            Captcha.MaxRotationAngle = 60;
-            Captcha.WaveDistortionAmplitude = 100;
-            Captcha.WaveDistortionPeriod = 100;
-            Captcha.LineNoiseCount = 10;
-            Captcha.WaveDistortionEnabled = true;
-            Captcha.LineNoiseEnabled = true;
+            captchaViewModel = new CaptchaViewModel();
 
             return RedirectToAction("Index");
+        }
+
+        //Replacing CaptchaController's GetCaptcha because we dont want to use static settings for captcha
+        public override FileStreamResult GetCaptcha()
+        {
+            var c = captchaViewModel;
+            var captcha = Captcha.Generate(new Font(c.FontFamily, c.FontSize), c.Chars, c.Length,
+                c.CharsSpacing, c.MaxRotationAngle, c.WaveDistortionEnabled, c.WaveDistortionAmplitude,
+                c.WaveDistortionPeriod, c.LineNoiseEnabled, c.LineNoiseCount);
+
+            Session["CAPTCHA"] = captcha;
+
+            MemoryStream ms = new MemoryStream();
+            captcha.Image.Save(ms, ImageFormat.Jpeg);
+
+            captcha.Image.Dispose();
+
+            ms.Seek(0, SeekOrigin.Begin);
+
+            Response.Cache.SetExpires(DateTime.UtcNow.AddDays(-1));
+            Response.Cache.SetValidUntilExpires(false);
+            Response.Cache.SetRevalidation(HttpCacheRevalidation.AllCaches);
+            Response.Cache.SetCacheability(HttpCacheability.NoCache);
+            Response.Cache.SetNoStore();
+
+            return new FileStreamResult(ms, "image/jpeg");
         }
     }
 }

@@ -4,6 +4,7 @@ namespace LightMvcCaptcha.Web.ViewModels
 {
     public class CaptchaViewModel
     {
+        public string FontFamily { get; set; } = Core.Captcha.Font.FontFamily.Name;
         public float FontSize { get; set; } = Core.Captcha.Font.Size;
         public string Chars { get; set; } = Core.Captcha.Chars;
         public uint Length { get; set; } = Core.Captcha.Length;
