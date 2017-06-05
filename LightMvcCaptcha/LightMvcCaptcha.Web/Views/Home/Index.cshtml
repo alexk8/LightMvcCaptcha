@@ -7,22 +7,73 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Captcha Test</title>
+    <style>
+        input
+        {
+            display: block;
+        }
+    </style>
 </head>
 <body>
+    @if (ViewBag.Answer != null)
+    {
+        <h1>Answer : @ViewBag.Answer</h1>
+    }
     <h2>Solve it</h2>
-
     @using (Html.BeginForm())
     {
+        <p>Here you can configurate captcha setting as you want, to save them just click on submit (you dont need to solve captcha for this)</p>
+        <p><span style="color:red">WARNING</span>: While captcha setting are static this means that all the settings will be changed for everyone on this site. Click @Html.ActionLink("here", "Reset") to reset settings for all</p>
+        @Html.DisplayNameFor(x => x.FontSize)
+        @Html.TextBoxFor(x => x.FontSize)
+        @Html.DisplayNameFor(x => x.Chars)
+        @Html.TextBoxFor(x => x.Chars, new { style = "width:400px" })
+
+        @Html.DisplayNameFor(x => x.CaptchaSize)
+        @Html.TextBoxFor(x => x.CaptchaSize)
+        @Html.DisplayNameFor(x => x.CaptchaDistance)
+        @Html.TextBoxFor(x => x.CaptchaDistance)
+        @Html.DisplayNameFor(x => x.CaptchaMaxAngle)
+        @Html.TextBoxFor(x => x.CaptchaMaxAngle)
+
+        @Html.DisplayNameFor(x => x.WaveDistortionEnabled)
+        @Html.TextBoxFor(x => x.WaveDistortionEnabled)
+        @Html.DisplayNameFor(x => x.WaveDistortionAmplitude)
+        @Html.TextBoxFor(x => x.WaveDistortionAmplitude)
+        @Html.DisplayNameFor(x => x.WaveDistortionPeriod)
+        @Html.TextBoxFor(x => x.WaveDistortionPeriod)
+
+        @Html.DisplayNameFor(x => x.LineNoiseEnabled)
+        @Html.TextBoxFor(x => x.LineNoiseEnabled)
+        @Html.DisplayNameFor(x => x.LineNoiseCount)
+        @Html.TextBoxFor(x => x.LineNoiseCount)
         <div>
             @Html.CaptchaFor(x => x.Captcha)
             @Html.ValidationMessageFor(x => x.Captcha)
         </div>
-    
+
+        <p>Click on the captcha to refresh it!</p>
         <div>
             @Html.TextBoxFor(x => x.Captcha)
         </div>
 
-        <input type="submit" value="submit" />
+        <input type="submit" value="submit"/>
     }
+    
+    <p>Paste this code to your <b>Global.asax -> Application_Start</b> method</p>
+
+    <pre>
+    Captcha.Font = new Font("Lucida Console", @Model.FontSize);
+    Captcha.Chars = "@Model.Chars";
+    Captcha.CaptchaSize = @Model.CaptchaSize;
+    Captcha.CaptchaDistance = @Model.CaptchaDistance;
+    Captcha.CaptchaMaxAngle = @Model.CaptchaMaxAngle;
+    Captcha.WaveDistortionAmplitude = @Model.WaveDistortionAmplitude;
+    Captcha.WaveDistortionPeriod = @Model.WaveDistortionPeriod;
+    Captcha.LineNoiseCount = @Model.LineNoiseCount;
+    Captcha.WaveDistortionEnabled = @Model.WaveDistortionEnabled.ToString().ToLower();
+    Captcha.LineNoiseEnabled = @Model.LineNoiseEnabled.ToString().ToLower();  
+    </pre>
+
 </body>
 </html>

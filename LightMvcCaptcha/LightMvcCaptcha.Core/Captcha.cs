@@ -34,7 +34,7 @@ namespace LightMvcCaptcha.Core
         /// <summary>
         /// The font that will be used to generate the captcha
         /// </summary>
-        public static Font Font { get; set; } = new Font("Lucida Console", 20);
+        public static Font Font { get; set; } = new Font("Lucida Console", 60);
 
         /// <summary>
         /// List of characters that will be used to generate the captcha
@@ -70,18 +70,18 @@ namespace LightMvcCaptcha.Core
         /// Wave distortion algorithm amplitude multiplier, in percent
         /// Default is 100%
         /// </summary>
-        public static uint WaveDistortionAmplitude { get; set; } = 50;
+        public static uint WaveDistortionAmplitude { get; set; } = 100;
 
         /// <summary>
         /// Wave distortion algorithm period multiplier, in percent
         /// Default is 100% 
         /// </summary>
-        public static uint WaveDistortionPeriod { get; set; } = 50;
+        public static uint WaveDistortionPeriod { get; set; } = 100;
 
         /// <summary>
         /// Enables or disables using line noise
         /// </summary>
-        public static bool LineNoiseEnabled { get; set; } = false;
+        public static bool LineNoiseEnabled { get; set; } = true;
 
         /// <summary>
         /// Sets the number of lines that will be drawn
