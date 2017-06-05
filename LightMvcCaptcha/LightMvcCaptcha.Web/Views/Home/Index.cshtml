@@ -23,18 +23,18 @@
     @using (Html.BeginForm())
     {
         <p>Here you can configurate captcha setting as you want, to save them just click on submit (you dont need to solve captcha for this)</p>
-        <p><span style="color:red">WARNING</span>: While captcha setting are static this means that all the settings will be changed for everyone on this site. Click @Html.ActionLink("here", "Reset") to reset settings for all</p>
+        <p><span style="color:red">WARNING</span>: While captcha settings are static - it means that all the settings will be changed for <b>everyone</b> on this site. Click @Html.ActionLink("here", "Reset") to reset settings for all</p>
         @Html.DisplayNameFor(x => x.FontSize)
         @Html.TextBoxFor(x => x.FontSize)
         @Html.DisplayNameFor(x => x.Chars)
         @Html.TextBoxFor(x => x.Chars, new { style = "width:400px" })
 
-        @Html.DisplayNameFor(x => x.CaptchaSize)
-        @Html.TextBoxFor(x => x.CaptchaSize)
-        @Html.DisplayNameFor(x => x.CaptchaDistance)
-        @Html.TextBoxFor(x => x.CaptchaDistance)
-        @Html.DisplayNameFor(x => x.CaptchaMaxAngle)
-        @Html.TextBoxFor(x => x.CaptchaMaxAngle)
+        @Html.DisplayNameFor(x => x.Length)
+        @Html.TextBoxFor(x => x.Length)
+        @Html.DisplayNameFor(x => x.CharsSpacing)
+        @Html.TextBoxFor(x => x.CharsSpacing)
+        @Html.DisplayNameFor(x => x.MaxRotationAngle)
+        @Html.TextBoxFor(x => x.MaxRotationAngle)
 
         @Html.DisplayNameFor(x => x.WaveDistortionEnabled)
         @Html.TextBoxFor(x => x.WaveDistortionEnabled)
@@ -65,9 +65,9 @@
     <pre>
     Captcha.Font = new Font("Lucida Console", @Model.FontSize);
     Captcha.Chars = "@Model.Chars";
-    Captcha.CaptchaSize = @Model.CaptchaSize;
-    Captcha.CaptchaDistance = @Model.CaptchaDistance;
-    Captcha.CaptchaMaxAngle = @Model.CaptchaMaxAngle;
+    Captcha.Length = @Model.Length;
+    Captcha.CharsSpacing = @Model.CharsSpacing;
+    Captcha.MaxRotationAngle = @Model.MaxRotationAngle;
     Captcha.WaveDistortionAmplitude = @Model.WaveDistortionAmplitude;
     Captcha.WaveDistortionPeriod = @Model.WaveDistortionPeriod;
     Captcha.LineNoiseCount = @Model.LineNoiseCount;

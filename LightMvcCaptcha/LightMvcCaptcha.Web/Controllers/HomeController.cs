@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Web;
 using System.Web.Mvc;
 using LightMvcCaptcha.Core;
 using LightMvcCaptcha.Web.ViewModels;
@@ -24,9 +21,9 @@ namespace LightMvcCaptcha.Web.Controllers
             {
                 Captcha.Font = new Font(Captcha.Font.FontFamily, model.FontSize);
                 Captcha.Chars = model.Chars;
-                Captcha.CaptchaSize = model.CaptchaSize;
-                Captcha.CaptchaDistance = model.CaptchaDistance;
-                Captcha.CaptchaMaxAngle = model.CaptchaMaxAngle;
+                Captcha.Length = model.Length;
+                Captcha.CharsSpacing = model.CharsSpacing;
+                Captcha.MaxRotationAngle = model.MaxRotationAngle;
                 Captcha.WaveDistortionAmplitude = model.WaveDistortionAmplitude;
                 Captcha.WaveDistortionPeriod = model.WaveDistortionPeriod;
                 Captcha.LineNoiseCount = model.LineNoiseCount;
@@ -50,9 +47,9 @@ namespace LightMvcCaptcha.Web.Controllers
         {
             Captcha.Font = new Font("Lucida Console", 60);
             Captcha.Chars = "WERTUPASDFGHKLZXCVBNM123456789";
-            Captcha.CaptchaSize = 6;
-            Captcha.CaptchaDistance = 48;
-            Captcha.CaptchaMaxAngle = 60;
+            Captcha.Length = 6;
+            Captcha.CharsSpacing = 48;
+            Captcha.MaxRotationAngle = 60;
             Captcha.WaveDistortionAmplitude = 100;
             Captcha.WaveDistortionPeriod = 100;
             Captcha.LineNoiseCount = 10;

@@ -64,10 +64,8 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
@@ -76,6 +74,7 @@
     <Compile Include="CaptchaController.cs" />
     <Compile Include="CaptchaExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RandomThreadSafe.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

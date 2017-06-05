@@ -1,12 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LightMvcCaptcha.Core
 {
@@ -17,17 +11,17 @@ namespace LightMvcCaptcha.Core
         /// <summary>
         /// This event will be called right AFTER filling captcha with BackgroundColor and BEFORE drawing key
         /// </summary>
-        public static event Action<Graphics> BeforeCaptchaDraw;
+        public static event Action<Graphics, Random> BeforeCaptchaDraw;
 
         /// <summary>
         /// This event will be called right AFTER drawing key and BEFORE line noise or wave distortion algorithms
         /// </summary>
-        public static event Action<Graphics> AfterCaptchaDraw;
+        public static event Action<Graphics, Random> AfterCaptchaDraw;
 
         /// <summary>
         /// This event will be called right AFTER line noise or wave distortion algorithms
         /// </summary>
-        public static event Action<Graphics> CaptchaCreated;
+        public static event Action<Graphics, Random> CaptchaCreated;
 
         // PUBLIC STATIC VARIABLES:
 
@@ -49,17 +43,17 @@ namespace LightMvcCaptcha.Core
         /// <summary>
         /// The number of characters in the captcha
         /// </summary>
-        public static uint CaptchaSize { get; set; } = 6;
+        public static uint Length { get; set; } = 6;
 
         /// <summary>
         /// The distance between characters in pixels
         /// </summary>
-        public static uint CaptchaDistance { get; set; } = (uint)(Font.Size*0.8);
+        public static uint CharsSpacing { get; set; } = (uint)(Font.Size*0.8);
 
         /// <summary>
         /// Maximum rotation angle (-angle, angle) for each character.
         /// </summary>
-        public static uint CaptchaMaxAngle { get; set; } = 60;
+        public static uint MaxRotationAngle { get; set; } = 60;
 
         /// <summary>
         /// Enables or disables using Wave distortion algorithm
@@ -67,13 +61,13 @@ namespace LightMvcCaptcha.Core
         public static bool WaveDistortionEnabled { get; set; } = true;
 
         /// <summary>
-        /// Wave distortion algorithm amplitude multiplier, in percent
+        /// Wave distortion algorithm amplitude multiplier, in percents
         /// Default is 100%
         /// </summary>
         public static uint WaveDistortionAmplitude { get; set; } = 100;
 
         /// <summary>
-        /// Wave distortion algorithm period multiplier, in percent
+        /// Wave distortion algorithm period multiplier, in percents
         /// Default is 100% 
         /// </summary>
         public static uint WaveDistortionPeriod { get; set; } = 100;
@@ -103,8 +97,6 @@ namespace LightMvcCaptcha.Core
         /// </summary>
         public string Key { get; }
 
-        private static readonly Random random = new Random();
-
         private Captcha(Bitmap img, Size size, string key)
         {
             Image = img;
@@ -120,30 +112,53 @@ namespace LightMvcCaptcha.Core
         /// <returns>Captcha</returns>
         public static Captcha Generate()
         {
-            string key = GetRandomString(CaptchaSize);
+            return Generate(Font, Chars, Length, CharsSpacing,
+                MaxRotationAngle, WaveDistortionEnabled, WaveDistortionAmplitude,
+                WaveDistortionPeriod, LineNoiseEnabled, LineNoiseCount);
+        }
 
-            Bitmap captcha = new Bitmap((int)(key.Length * CaptchaDistance * 1.15f), (int)(Font.Size * 1.2f));
+        /// <summary>
+        /// Generates a CAPTCHA image
+        /// </summary>
+        /// <param name="font">The font that will be used to generate the captcha</param>
+        /// <param name="chars">List of characters that will be used to generate the captcha</param>
+        /// <param name="length">The number of characters in the captcha</param>
+        /// <param name="charsSpacing">The distance between characters in pixels</param>
+        /// <param name="maxRotationAngle">Maximum rotation angle (-angle, angle) for each character.</param>
+        /// <param name="waveDistortionEnabled">Enables or disables using Wave distortion algorithm</param>
+        /// <param name="waveDistortionAmplitude">Wave distortion algorithm amplitude multiplier, in percents</param>
+        /// <param name="waveDistortionPeriod">Wave distortion algorithm period multiplier, in percents</param>
+        /// <param name="lineNoiseEnabled">Enables or disables using line noise</param>
+        /// <param name="lineNoiseCount">Sets the number of lines that will be drawn</param>
+        /// <returns>Captcha</returns>
+        public static Captcha Generate(Font font, string chars, uint length, uint charsSpacing, 
+            uint maxRotationAngle, bool waveDistortionEnabled, uint waveDistortionAmplitude, 
+            uint waveDistortionPeriod, bool lineNoiseEnabled, uint lineNoiseCount)
+        {
+            string key = GetRandomString(chars, length);
 
-            CreateDigits(captcha, key);
+            Bitmap captcha = new Bitmap((int)(key.Length * charsSpacing * 1.15f), (int)(font.Size * 1.2f));
 
-            if (LineNoiseEnabled)
-                DrawNoise(captcha, LineNoiseCount);
+            CreateDigits(captcha, key, font, charsSpacing, maxRotationAngle);
 
-            if (WaveDistortionEnabled)
-                WaveTransform(ref captcha);
+            if (lineNoiseEnabled)
+                DrawNoise(captcha, lineNoiseCount);
+
+            if (waveDistortionEnabled)
+                WaveTransform(ref captcha, waveDistortionPeriod, waveDistortionAmplitude);
 
             using(var g = Graphics.FromImage(captcha))
-                CaptchaCreated?.Invoke(g);
+                CaptchaCreated?.Invoke(g, RandomThreadSafe.Instance);
 
             var size = new Size(captcha.Width, captcha.Height);
 
             return new Captcha(captcha, size, key);
         }
 
-        private static void WaveTransform(ref Bitmap img)
+        private static void WaveTransform(ref Bitmap img, uint waveDistortionPeriod, uint waveDistortionAmplitude)
         {
-            double F = 0.08 * WaveDistortionPeriod / 100d;
-            double A = 1.8 * WaveDistortionAmplitude / 100d;
+            double F = 0.08 * waveDistortionPeriod / 100d;
+            double A = 1.8 * waveDistortionAmplitude / 100d;
 
             Bitmap transImg = new Bitmap(img);
 
@@ -160,50 +175,47 @@ namespace LightMvcCaptcha.Core
             img = transImg;
         }
 
-        private static string GetRandomString(uint size)
+        private static string GetRandomString(string chars, uint size)
         {
-            string chars = "";
+            string captcha = "";
 
-            lock (random)
-            {
-                for (int i = 0; i < size; i++)
-                    chars += Chars[random.Next(0, Chars.Length)];
-            }
+            for (int i = 0; i < size; i++)
+                captcha += chars[RandomThreadSafe.Instance.Next(0, chars.Length)];
 
-            return chars;
+            return captcha;
         }
 
-        private static void CreateDigits(Bitmap img, string captcha)
+        private static void CreateDigits(Bitmap img, string captcha, Font font, uint charsSpacing, uint maxRotationAngle)
         {
             using (Graphics g = Graphics.FromImage(img))
             {
                 g.Clear(Color.White);
 
-                BeforeCaptchaDraw?.Invoke(g);
+                BeforeCaptchaDraw?.Invoke(g, RandomThreadSafe.Instance);
 
                 for (int i = 0; i < captcha.Length; i++)
                 {
                     string num = captcha[i].ToString();
 
-                    PointF centerOld = g.MeasureString(num, Font).ToPointF();
+                    PointF centerOld = g.MeasureString(num, font).ToPointF();
 
                     centerOld.X /= 2;
-                    centerOld.X += i * CaptchaDistance;
+                    centerOld.X += i * charsSpacing;
 
                     centerOld.Y /= 2;
 
 
                     using (Matrix matrix = new Matrix())
                     {
-                        matrix.RotateAt(random.Next(-((int)CaptchaMaxAngle), (int)CaptchaMaxAngle + 1), centerOld);
+                        matrix.RotateAt(RandomThreadSafe.Instance.Next(-((int)maxRotationAngle), (int)maxRotationAngle + 1), centerOld);
 
                         g.Transform = matrix;
 
-                        g.DrawString(num, Font, Brushes.Black, i * CaptchaDistance, 0);
+                        g.DrawString(num, font, Brushes.Black, i * charsSpacing, 0);
                     }
                 }
 
-                AfterCaptchaDraw?.Invoke(g);
+                AfterCaptchaDraw?.Invoke(g, RandomThreadSafe.Instance);
             }
         }
 
@@ -213,11 +225,11 @@ namespace LightMvcCaptcha.Core
             {
                 for (int i = 0; i < count; i++)
                 {
-                    int x1 = random.Next(0, img.Width);
-                    int y1 = random.Next(0, img.Height);
+                    int x1 = RandomThreadSafe.Instance.Next(0, img.Width);
+                    int y1 = RandomThreadSafe.Instance.Next(0, img.Height);
 
-                    int x2 = random.Next(0, img.Width);
-                    int y2 = random.Next(0, img.Height);
+                    int x2 = RandomThreadSafe.Instance.Next(0, img.Width);
+                    int y2 = RandomThreadSafe.Instance.Next(0, img.Height);
 
                     g.DrawLine(Pens.Red, x1, y1, x2, y2);
                 }

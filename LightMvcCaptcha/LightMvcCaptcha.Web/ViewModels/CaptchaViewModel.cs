@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using LightMvcCaptcha.Core;
+﻿using LightMvcCaptcha.Core;
 
 namespace LightMvcCaptcha.Web.ViewModels
 {
@@ -10,9 +6,9 @@ namespace LightMvcCaptcha.Web.ViewModels
     {
         public float FontSize { get; set; } = Core.Captcha.Font.Size;
         public string Chars { get; set; } = Core.Captcha.Chars;
-        public uint CaptchaSize { get; set; } = Core.Captcha.CaptchaSize;
-        public uint CaptchaDistance { get; set; } = Core.Captcha.CaptchaDistance;
-        public uint CaptchaMaxAngle { get; set; } = Core.Captcha.CaptchaMaxAngle;
+        public uint Length { get; set; } = Core.Captcha.Length;
+        public uint CharsSpacing { get; set; } = Core.Captcha.CharsSpacing;
+        public uint MaxRotationAngle { get; set; } = Core.Captcha.MaxRotationAngle;
         public uint WaveDistortionAmplitude { get; set; } = Core.Captcha.WaveDistortionAmplitude;
         public uint WaveDistortionPeriod { get; set; } = Core.Captcha.WaveDistortionPeriod;
         public uint LineNoiseCount { get; set; } = Core.Captcha.LineNoiseCount;
