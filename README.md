@@ -6,7 +6,8 @@ Here you can test it: [captcha.cygwin255.ml](http://captcha.cygwin255.ml) and de
 ## How to use?
 You need to perform 5 simple steps to embed LightMvcCaptcha to your project
 1. Add a nuget package *OR compile it and add dll to your project by yourself*:<br>
-***nuget command will be there soon***
+**`Install-Package LightMvcCaptcha.Core`**<br>
+[https://www.nuget.org/packages/LightMvcCaptcha.Core](https://www.nuget.org/packages/LightMvcCaptcha.Core)
 <br><br>
 2. Inherit any Controller from `CaptchaController` abstract class:<br>
 `public class MyController : CaptchaController`
@@ -81,7 +82,5 @@ To set color of every line, ellipse and character that will be drawn you can use
 All changes should be placed in **Global.asax -> Application_Start**
 
 At the end, how to add event:
-`Captcha.BeforeCaptchaDrawEvent += (g, rnd, size) =>
-{
-   //Your code there
-};`
+`Captcha.BeforeCaptchaDrawEvent += (g, rnd, size) => { /*Your code there*/ };`
+Fin
