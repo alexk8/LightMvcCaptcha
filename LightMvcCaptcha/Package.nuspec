@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>LightMvcCaptcha</id>
+    <version>1.0.0</version>
+    <authors>cygwin255</authors>
+    <owners>cygwin255</owners>
+    <licenseUrl>http://www.opensource.org/licenses/mit-license.php</licenseUrl>
+    <projectUrl>https://github.com/cygwin255/LightMvcCaptcha</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Fully customizable highspeed captcha for asp.net mvc5</description>
+    <releaseNotes>Release notes are at https://github.com/cygwin255/LightMvcCaptcha</releaseNotes>
+    <copyright>Copyright 2017</copyright>
+    <tags>captcha asp.net mvc5 highspeed customizable</tags>
+  </metadata>
+</package>
