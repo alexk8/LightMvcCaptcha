@@ -13,19 +13,22 @@ namespace LightMvcCaptcha.Core
         /// <summary>
         /// This event will be called right AFTER filling captcha with BackgroundColor and BEFORE drawing key
         /// </summary>
-        public static event Action<Graphics, Random> BeforeCaptchaDrawEvent;
+        public static event Action<Graphics, Random, Size> BeforeCaptchaDrawEvent;
 
         /// <summary>
         /// This event will be called right AFTER drawing key and BEFORE line noise or wave distortion algorithms
         /// </summary>
-        public static event Action<Graphics, Random> AfterCaptchaDrawEvent;
+        public static event Action<Graphics, Random, Size> AfterCaptchaDrawEvent;
 
         /// <summary>
         /// This event will be called right AFTER line noise or wave distortion algorithms
         /// </summary>
-        public static event Action<Graphics, Random> CaptchaCreatedEvent;
+        public static event Action<Graphics, Random, Size> CaptchaCreatedEvent;
 
         // PUBLIC STATIC VARIABLES:
+
+        public static Func<Random, Color> RandomColorFunction { get; } =
+            rnd => Color.FromArgb(rnd.Next(256), rnd.Next(256), rnd.Next(256));
 
         /// <summary>
         /// The font that will be used to generate the captcha
@@ -55,7 +58,7 @@ namespace LightMvcCaptcha.Core
         /// <summary>
         /// Maximum rotation angle (-angle, angle) for each character.
         /// </summary>
-        public static uint MaxRotationAngle { get; set; } = 60;
+        public static uint MaxRotationAngle { get; set; } = 45;
 
         /// <summary>
         /// Enables or disables using Wave distortion algorithm
@@ -66,13 +69,13 @@ namespace LightMvcCaptcha.Core
         /// Wave distortion algorithm amplitude multiplier, in percents
         /// Default is 100%
         /// </summary>
-        public static uint WaveDistortionAmplitude { get; set; } = 100;
+        public static uint WaveDistortionAmplitude { get; set; } = 70;
 
         /// <summary>
         /// Wave distortion algorithm period multiplier, in percents
         /// Default is 100% 
         /// </summary>
-        public static uint WaveDistortionPeriod { get; set; } = 100;
+        public static uint WaveDistortionPeriod { get; set; } = 70;
 
         /// <summary>
         /// Enables or disables using line noise
@@ -85,19 +88,41 @@ namespace LightMvcCaptcha.Core
         public static uint LineNoiseCount { get; set; } = 10;
 
         /// <summary>
+        /// Enables or disables using ellipse noise
+        /// </summary>
+        public static bool EllipseNoiseEnabled { get; set; } = true;
+
+        /// <summary>
+        /// The number of ellipses that will be drawn
+        /// </summary>
+        public static uint EllipseNoiseCount { get; set; } = 10;
+
+
+        /// <summary>
         /// The background color of the captcha. If you want to draw smth as background use BeforeCaptchaDrawEvent
         /// </summary>
         public static Color BackgroundColor { get; set; } = Color.White;
 
         /// <summary>
         /// The function that will be used to get the color of every character
+        /// Default function is creating random color
         /// </summary>
-        public static Func<Random, Brush> CharColorFunction { get; set; }
+        public static Func<Random, Brush> CharColorFunction { get; set; } =
+            rnd => new SolidBrush(RandomColorFunction(rnd));
 
         /// <summary>
-        /// The function that will be used to get the color of every line if LineNoiseEnabled is set to true
+        /// The function that will be used to get the color of every line if LineNoiseEnabled is true
+        /// Default function is creating random color
         /// </summary>
-        public static Func<Random, Pen> LineColorFunction { get; set; }
+        public static Func<Random, Pen> LineColorFunction { get; set; } =
+            rnd => new Pen(RandomColorFunction(rnd));
+
+        /// <summary>
+        /// The function that will be used to get the color of every ellipse if EllipseNoiseEnabled is true
+        /// Default function is creating random color
+        /// </summary>
+        public static Func<Random, Brush> EllipseColorFunction { get; set; } =
+            rnd => new SolidBrush(RandomColorFunction(rnd));
 
 
         //PUBLIC VARIABLES AND METHODS:
@@ -139,7 +164,8 @@ namespace LightMvcCaptcha.Core
         {
             return Generate(Font, Chars, Length, CharsSpacing,
                 MaxRotationAngle, WaveDistortionEnabled, WaveDistortionAmplitude,
-                WaveDistortionPeriod, LineNoiseEnabled, LineNoiseCount);
+                WaveDistortionPeriod, LineNoiseEnabled, LineNoiseCount, 
+                EllipseNoiseEnabled, EllipseNoiseCount);
         }
 
         /// <summary>
@@ -158,23 +184,24 @@ namespace LightMvcCaptcha.Core
         /// <returns>Captcha</returns>
         public static Captcha Generate(Font font, string chars, uint length, uint charsSpacing,
             uint maxRotationAngle, bool waveDistortionEnabled, uint waveDistortionAmplitude,
-            uint waveDistortionPeriod, bool lineNoiseEnabled, uint lineNoiseCount)
+            uint waveDistortionPeriod, bool lineNoiseEnabled, uint lineNoiseCount,
+            bool ellipseNoiseEnabled, uint ellipseNoiseCount)
         {
             string key = GetRandomString(chars, length);
 
             DirectBitmap captcha = new DirectBitmap((int) (key.Length * charsSpacing * 1.15f),
                 CalculateHeight(font, chars));
 
-            CreateDigits(captcha, key, font, charsSpacing, maxRotationAngle);
+            CreateDigits(captcha, key, font, charsSpacing, maxRotationAngle, ellipseNoiseEnabled, ellipseNoiseCount);
 
             if (lineNoiseEnabled)
-                DrawNoise(captcha, lineNoiseCount);
+                DrawLineNoise(captcha, lineNoiseCount);
 
             if (waveDistortionEnabled)
                 WaveTransform(ref captcha, waveDistortionPeriod, waveDistortionAmplitude);
 
             using (var g = Graphics.FromImage(captcha.Bitmap))
-                CaptchaCreatedEvent?.Invoke(g, RandomThreadSafe.Instance);
+                CaptchaCreatedEvent?.Invoke(g, RandomThreadSafe.Instance, captcha.Bitmap.Size);
 
             var size = new Size(captcha.Width, captcha.Height);
 
@@ -235,13 +262,17 @@ namespace LightMvcCaptcha.Core
             return captcha;
         }
 
-        private static void CreateDigits(DirectBitmap img, string captcha, Font font, uint charsSpacing, uint maxRotationAngle)
+        private static void CreateDigits(DirectBitmap img, string captcha, Font font, uint charsSpacing, 
+            uint maxRotationAngle, bool ellipseNoiseEnabled, uint ellipseNoiseCount)
         {
             using (Graphics g = Graphics.FromImage(img.Bitmap))
             {
                 g.Clear(BackgroundColor);
 
-                BeforeCaptchaDrawEvent?.Invoke(g, RandomThreadSafe.Instance);
+                BeforeCaptchaDrawEvent?.Invoke(g, RandomThreadSafe.Instance, img.Bitmap.Size);
+
+                if (ellipseNoiseEnabled)
+                    DrawEllipseNoise(img, g, ellipseNoiseCount);
 
                 for (int i = 0; i < captcha.Length; i++)
                 {
@@ -264,14 +295,16 @@ namespace LightMvcCaptcha.Core
                         Brush brush = CharColorFunction?.Invoke(RandomThreadSafe.Instance) ?? Brushes.Black;
 
                         g.DrawString(num, font, brush, i * charsSpacing, 0);
+
+                        brush.Dispose();
                     }
                 }
 
-                AfterCaptchaDrawEvent?.Invoke(g, RandomThreadSafe.Instance);
+                AfterCaptchaDrawEvent?.Invoke(g, RandomThreadSafe.Instance, img.Bitmap.Size);
             }
         }
 
-        private static void DrawNoise(DirectBitmap img, uint count)
+        private static void DrawLineNoise(DirectBitmap img, uint count)
         {
             using (Graphics g = Graphics.FromImage(img.Bitmap))
             {
@@ -288,6 +321,14 @@ namespace LightMvcCaptcha.Core
                     g.DrawLine(pen, x1, y1, x2, y2);
                 }
             }
+        }
+
+        private static void DrawEllipseNoise(DirectBitmap img, Graphics g, uint count)
+        {
+            var rnd = RandomThreadSafe.Instance;
+            for (int i = 0; i < count; i++)
+                g.FillEllipse(EllipseColorFunction(rnd), rnd.Next(img.Width),
+                    rnd.Next(img.Height), rnd.Next(img.Width / 5), rnd.Next(img.Width / 5));
         }
     }
 }

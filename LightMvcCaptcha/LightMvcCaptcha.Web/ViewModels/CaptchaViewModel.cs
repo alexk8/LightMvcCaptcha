@@ -13,9 +13,12 @@ namespace LightMvcCaptcha.Web.ViewModels
         public uint WaveDistortionAmplitude { get; set; } = Core.Captcha.WaveDistortionAmplitude;
         public uint WaveDistortionPeriod { get; set; } = Core.Captcha.WaveDistortionPeriod;
         public uint LineNoiseCount { get; set; } = Core.Captcha.LineNoiseCount;
+        public uint EllipseNoiseCount { get; set; } = Core.Captcha.EllipseNoiseCount;
+
         public bool WaveDistortionEnabled { get; set; } = Core.Captcha.WaveDistortionEnabled;
         public bool LineNoiseEnabled { get; set; } = Core.Captcha.LineNoiseEnabled;
-        
+        public bool EllipseNoiseEnabled { get; set; } = Core.Captcha.EllipseNoiseEnabled;
+
         [Captcha(ErrorMessage = "Wrong captcha")]
         public string Captcha { get; set; }
     }

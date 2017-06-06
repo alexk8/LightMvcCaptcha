@@ -20,40 +20,48 @@
     </style>
 </head>
 <body>
-    @if (ViewBag.Answer != null)
+    @if (TempData["Answer"] != null)
     {
-        <h1>Answer : @ViewBag.Answer</h1>
+        <h1>Answer : @TempData["Answer"]</h1>
     }
     @using (Html.BeginForm())
     {
         <p>Here you can configurate captcha setting as you want, to save them just click on submit (you dont need to solve captcha for this)</p>
         <p>Click @Html.ActionLink("here", "Reset") to reset your settings</p>
-        
-        @Html.DisplayNameFor(x => x.FontFamily)
-        @Html.TextBoxFor(x => x.FontFamily)
-        @Html.DisplayNameFor(x => x.FontSize)
-        @Html.TextBoxFor(x => x.FontSize)
-        @Html.DisplayNameFor(x => x.Chars)
-        @Html.TextBoxFor(x => x.Chars, new { style = "width:400px" })
+        <div>
+            @Html.DisplayNameFor(x => x.Chars)
+            @Html.TextBoxFor(x => x.Chars, new { style = "width:400px" })
 
-        @Html.DisplayNameFor(x => x.Length)
-        @Html.TextBoxFor(x => x.Length)
-        @Html.DisplayNameFor(x => x.CharsSpacing)
-        @Html.TextBoxFor(x => x.CharsSpacing)
-        @Html.DisplayNameFor(x => x.MaxRotationAngle)
-        @Html.TextBoxFor(x => x.MaxRotationAngle)
+            @Html.DisplayNameFor(x => x.FontFamily)
+            @Html.TextBoxFor(x => x.FontFamily)
+            @Html.DisplayNameFor(x => x.FontSize)
+            @Html.TextBoxFor(x => x.FontSize)
 
-        @Html.DisplayNameFor(x => x.WaveDistortionEnabled)
-        @Html.TextBoxFor(x => x.WaveDistortionEnabled)
-        @Html.DisplayNameFor(x => x.WaveDistortionAmplitude)
-        @Html.TextBoxFor(x => x.WaveDistortionAmplitude)
-        @Html.DisplayNameFor(x => x.WaveDistortionPeriod)
-        @Html.TextBoxFor(x => x.WaveDistortionPeriod)
+            @Html.DisplayNameFor(x => x.Length)
+            @Html.TextBoxFor(x => x.Length)
+            @Html.DisplayNameFor(x => x.CharsSpacing)
+            @Html.TextBoxFor(x => x.CharsSpacing)
+            @Html.DisplayNameFor(x => x.MaxRotationAngle)
+            @Html.TextBoxFor(x => x.MaxRotationAngle)
+        </div>
+        <div>
+            @Html.DisplayNameFor(x => x.WaveDistortionEnabled)
+            @Html.TextBoxFor(x => x.WaveDistortionEnabled)
+            @Html.DisplayNameFor(x => x.WaveDistortionAmplitude)
+            @Html.TextBoxFor(x => x.WaveDistortionAmplitude)
+            @Html.DisplayNameFor(x => x.WaveDistortionPeriod)
+            @Html.TextBoxFor(x => x.WaveDistortionPeriod)
 
-        @Html.DisplayNameFor(x => x.LineNoiseEnabled)
-        @Html.TextBoxFor(x => x.LineNoiseEnabled)
-        @Html.DisplayNameFor(x => x.LineNoiseCount)
-        @Html.TextBoxFor(x => x.LineNoiseCount)
+            @Html.DisplayNameFor(x => x.LineNoiseEnabled)
+            @Html.TextBoxFor(x => x.LineNoiseEnabled)
+            @Html.DisplayNameFor(x => x.LineNoiseCount)
+            @Html.TextBoxFor(x => x.LineNoiseCount)
+
+            @Html.DisplayNameFor(x => x.EllipseNoiseEnabled)
+            @Html.TextBoxFor(x => x.EllipseNoiseEnabled)
+            @Html.DisplayNameFor(x => x.EllipseNoiseCount)
+            @Html.TextBoxFor(x => x.EllipseNoiseCount)
+        </div>
         <div>
             @Html.CaptchaFor(x => x.Captcha)
             @Html.ValidationMessageFor(x => x.Captcha)
@@ -66,10 +74,10 @@
 
         <input type="submit" value="submit"/>
     }
-    
-    <p>Paste this code to your <b>Global.asax -> Application_Start</b> method</p>
+    <div>
+        <p>To use selected settings in your project paste the code below to your <b>Global.asax -> Application_Start</b> method</p>
 
-    <pre>
+        <pre>
     Captcha.Font = new Font("@Model.FontFamily", @Model.FontSize);
     Captcha.Chars = "@Model.Chars";
     Captcha.Length = @Model.Length;
@@ -80,7 +88,9 @@
     Captcha.LineNoiseCount = @Model.LineNoiseCount;
     Captcha.WaveDistortionEnabled = @Model.WaveDistortionEnabled.ToString().ToLower();
     Captcha.LineNoiseEnabled = @Model.LineNoiseEnabled.ToString().ToLower();  
+    Captcha.EllipseNoiseEnabled = @Model.EllipseNoiseEnabled.ToString().ToLower();
+    Captcha.EllipseNoiseCount = @Model.EllipseNoiseCount;
     </pre>
-
+    </div>
 </body>
 </html>

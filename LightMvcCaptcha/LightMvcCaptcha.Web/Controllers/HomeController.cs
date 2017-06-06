@@ -38,7 +38,7 @@ namespace LightMvcCaptcha.Web.Controllers
 
             if (ModelState.IsValid)
             {
-                ViewBag.Answer = "Correct! " + model.Captcha;
+                TempData["Answer"] = "Correct! " + model.Captcha;
             }
 
             return RedirectToAction("Index");
@@ -57,7 +57,8 @@ namespace LightMvcCaptcha.Web.Controllers
             var c = captchaViewModel;
             var captcha = Captcha.Generate(new Font(c.FontFamily, c.FontSize), c.Chars, c.Length,
                 c.CharsSpacing, c.MaxRotationAngle, c.WaveDistortionEnabled, c.WaveDistortionAmplitude,
-                c.WaveDistortionPeriod, c.LineNoiseEnabled, c.LineNoiseCount);
+                c.WaveDistortionPeriod, c.LineNoiseEnabled, c.LineNoiseCount, c.EllipseNoiseEnabled, 
+                c.EllipseNoiseCount);
 
             Session["CAPTCHA"] = captcha;
 
