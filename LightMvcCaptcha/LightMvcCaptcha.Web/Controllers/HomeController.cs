@@ -61,12 +61,8 @@ namespace LightMvcCaptcha.Web.Controllers
 
             Session["CAPTCHA"] = captcha;
 
-            MemoryStream ms = new MemoryStream();
-            captcha.Image.Save(ms, ImageFormat.Jpeg);
-
-            captcha.Image.Dispose();
-
-            ms.Seek(0, SeekOrigin.Begin);
+            var ms = new MemoryStream(captcha.Image);
+            captcha.DisposeImage();
 
             Response.Cache.SetExpires(DateTime.UtcNow.AddDays(-1));
             Response.Cache.SetValidUntilExpires(false);

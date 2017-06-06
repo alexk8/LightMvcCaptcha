@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
+using System.IO;
 
 namespace LightMvcCaptcha.Core
 {
@@ -11,17 +13,17 @@ namespace LightMvcCaptcha.Core
         /// <summary>
         /// This event will be called right AFTER filling captcha with BackgroundColor and BEFORE drawing key
         /// </summary>
-        public static event Action<Graphics, Random> BeforeCaptchaDraw;
+        public static event Action<Graphics, Random> BeforeCaptchaDrawEvent;
 
         /// <summary>
         /// This event will be called right AFTER drawing key and BEFORE line noise or wave distortion algorithms
         /// </summary>
-        public static event Action<Graphics, Random> AfterCaptchaDraw;
+        public static event Action<Graphics, Random> AfterCaptchaDrawEvent;
 
         /// <summary>
         /// This event will be called right AFTER line noise or wave distortion algorithms
         /// </summary>
-        public static event Action<Graphics, Random> CaptchaCreated;
+        public static event Action<Graphics, Random> CaptchaCreatedEvent;
 
         // PUBLIC STATIC VARIABLES:
 
@@ -78,16 +80,32 @@ namespace LightMvcCaptcha.Core
         public static bool LineNoiseEnabled { get; set; } = true;
 
         /// <summary>
-        /// Sets the number of lines that will be drawn
+        /// The number of lines that will be drawn
         /// </summary>
         public static uint LineNoiseCount { get; set; } = 10;
+
+        /// <summary>
+        /// The background color of the captcha. If you want to draw smth as background use BeforeCaptchaDrawEvent
+        /// </summary>
+        public static Color BackgroundColor { get; set; } = Color.White;
+
+        /// <summary>
+        /// The function that will be used to get the color of every character
+        /// </summary>
+        public static Func<Random, Brush> CharColorFunction { get; set; }
+
+        /// <summary>
+        /// The function that will be used to get the color of every line if LineNoiseEnabled is set to true
+        /// </summary>
+        public static Func<Random, Pen> LineColorFunction { get; set; }
+
 
         //PUBLIC VARIABLES AND METHODS:
 
         /// <summary>
         /// Bitmap with captcha image, getting disposed after sending
         /// </summary>
-        public Bitmap Image { get; }
+        public byte[] Image { get; private set; }
         /// <summary>
         /// The size of captcha. Depends on Captcha.Font size and Captcha.Generate settings
         /// </summary>
@@ -97,13 +115,20 @@ namespace LightMvcCaptcha.Core
         /// </summary>
         public string Key { get; }
 
-        private Captcha(Bitmap img, Size size, string key)
+        private Captcha(byte[] img, Size size, string key)
         {
             Image = img;
             Size = size;
             Key = key;
         }
 
+        /// <summary>
+        /// After sending captcha image to user the remaining class will live in Session, so we can remove unnessesary element
+        /// </summary>
+        public void DisposeImage()
+        {
+            Image = null;
+        }
         // STATIC METHODS:
 
         /// <summary>
@@ -131,13 +156,14 @@ namespace LightMvcCaptcha.Core
         /// <param name="lineNoiseEnabled">Enables or disables using line noise</param>
         /// <param name="lineNoiseCount">Sets the number of lines that will be drawn</param>
         /// <returns>Captcha</returns>
-        public static Captcha Generate(Font font, string chars, uint length, uint charsSpacing, 
-            uint maxRotationAngle, bool waveDistortionEnabled, uint waveDistortionAmplitude, 
+        public static Captcha Generate(Font font, string chars, uint length, uint charsSpacing,
+            uint maxRotationAngle, bool waveDistortionEnabled, uint waveDistortionAmplitude,
             uint waveDistortionPeriod, bool lineNoiseEnabled, uint lineNoiseCount)
         {
             string key = GetRandomString(chars, length);
 
-            Bitmap captcha = new Bitmap((int)(key.Length * charsSpacing * 1.15f), CalculateHeight(font, chars));
+            DirectBitmap captcha = new DirectBitmap((int) (key.Length * charsSpacing * 1.15f),
+                CalculateHeight(font, chars));
 
             CreateDigits(captcha, key, font, charsSpacing, maxRotationAngle);
 
@@ -147,12 +173,21 @@ namespace LightMvcCaptcha.Core
             if (waveDistortionEnabled)
                 WaveTransform(ref captcha, waveDistortionPeriod, waveDistortionAmplitude);
 
-            using(var g = Graphics.FromImage(captcha))
-                CaptchaCreated?.Invoke(g, RandomThreadSafe.Instance);
+            using (var g = Graphics.FromImage(captcha.Bitmap))
+                CaptchaCreatedEvent?.Invoke(g, RandomThreadSafe.Instance);
 
             var size = new Size(captcha.Width, captcha.Height);
 
-            return new Captcha(captcha, size, key);
+            byte[] captchaBytes;
+            using (MemoryStream ms = new MemoryStream())
+            {
+                captcha.Bitmap.Save(ms, ImageFormat.Jpeg);
+                captchaBytes = ms.ToArray();
+            }
+
+            captcha.Dispose();
+
+            return new Captcha(captchaBytes, size, key);
         }
 
         private static int CalculateHeight(Font font, string text)
@@ -166,20 +201,24 @@ namespace LightMvcCaptcha.Core
             }
         }
 
-        private static void WaveTransform(ref Bitmap img, uint waveDistortionPeriod, uint waveDistortionAmplitude)
+        private static void WaveTransform(ref DirectBitmap img, uint waveDistortionPeriod, uint waveDistortionAmplitude)
         {
             double F = 0.08 * waveDistortionPeriod / 100d;
             double A = 1.8 * waveDistortionAmplitude / 100d;
 
-            Bitmap transImg = new Bitmap(img);
+            DirectBitmap transImg = new DirectBitmap(img.Width, img.Height);
+
+            int backgroundColor = BackgroundColor.ToArgb();
+            for (int i = 0; i < img.Width * img.Height; i++)
+                transImg.Bits[i] = backgroundColor;
 
             for (int x = 0; x < img.Width; x++)
                 for (int y = 0; y < img.Height; y++)
                 {
-                    double _x = x + (A * Math.Sin(2.0 * Math.PI * y * F));
-                    double _y = y;
+                    int _x = Math.Max(Math.Min(Convert.ToInt32(x + (A * Math.Sin(2.0 * Math.PI * y * F))), img.Width - 1), 0);
+                    int _y = y;
 
-                    transImg.SetPixel(Math.Max(Math.Min(Convert.ToInt32(_x), img.Width - 1), 0), Convert.ToInt32(_y), img.GetPixel(x, y));
+                    transImg.Bits[_x + _y * img.Width] = img.Bits[x + y * img.Width];
                 }
 
             img.Dispose();
@@ -196,13 +235,13 @@ namespace LightMvcCaptcha.Core
             return captcha;
         }
 
-        private static void CreateDigits(Bitmap img, string captcha, Font font, uint charsSpacing, uint maxRotationAngle)
+        private static void CreateDigits(DirectBitmap img, string captcha, Font font, uint charsSpacing, uint maxRotationAngle)
         {
-            using (Graphics g = Graphics.FromImage(img))
+            using (Graphics g = Graphics.FromImage(img.Bitmap))
             {
-                g.Clear(Color.White);
+                g.Clear(BackgroundColor);
 
-                BeforeCaptchaDraw?.Invoke(g, RandomThreadSafe.Instance);
+                BeforeCaptchaDrawEvent?.Invoke(g, RandomThreadSafe.Instance);
 
                 for (int i = 0; i < captcha.Length; i++)
                 {
@@ -222,17 +261,19 @@ namespace LightMvcCaptcha.Core
 
                         g.Transform = matrix;
 
-                        g.DrawString(num, font, Brushes.Black, i * charsSpacing, 0);
+                        Brush brush = CharColorFunction?.Invoke(RandomThreadSafe.Instance) ?? Brushes.Black;
+
+                        g.DrawString(num, font, brush, i * charsSpacing, 0);
                     }
                 }
 
-                AfterCaptchaDraw?.Invoke(g, RandomThreadSafe.Instance);
+                AfterCaptchaDrawEvent?.Invoke(g, RandomThreadSafe.Instance);
             }
         }
 
-        private static void DrawNoise(Bitmap img, uint count)
+        private static void DrawNoise(DirectBitmap img, uint count)
         {
-            using (Graphics g = Graphics.FromImage(img))
+            using (Graphics g = Graphics.FromImage(img.Bitmap))
             {
                 for (int i = 0; i < count; i++)
                 {
@@ -242,7 +283,9 @@ namespace LightMvcCaptcha.Core
                     int x2 = RandomThreadSafe.Instance.Next(0, img.Width);
                     int y2 = RandomThreadSafe.Instance.Next(0, img.Height);
 
-                    g.DrawLine(Pens.Red, x1, y1, x2, y2);
+                    Pen pen = LineColorFunction?.Invoke(RandomThreadSafe.Instance) ?? Pens.Red;
+
+                    g.DrawLine(pen, x1, y1, x2, y2);
                 }
             }
         }

@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LightMvcCaptcha.Core", "Lig
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LightMvcCaptcha.Web", "LightMvcCaptcha.Web\LightMvcCaptcha.Web.csproj", "{9A01C4EB-998C-4C11-9C60-580EEE6D73D6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LightMvcCaptcha.SpeedTest", "LightMvcCaptcha.SpeedTest\LightMvcCaptcha.SpeedTest.csproj", "{826A6A49-B040-4CB0-8CC7-B9366EFC973A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{9A01C4EB-998C-4C11-9C60-580EEE6D73D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9A01C4EB-998C-4C11-9C60-580EEE6D73D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9A01C4EB-998C-4C11-9C60-580EEE6D73D6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{826A6A49-B040-4CB0-8CC7-B9366EFC973A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{826A6A49-B040-4CB0-8CC7-B9366EFC973A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{826A6A49-B040-4CB0-8CC7-B9366EFC973A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{826A6A49-B040-4CB0-8CC7-B9366EFC973A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

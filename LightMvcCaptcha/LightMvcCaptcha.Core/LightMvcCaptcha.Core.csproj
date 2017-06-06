@@ -73,6 +73,7 @@
     <Compile Include="CaptchaAttribute.cs" />
     <Compile Include="CaptchaController.cs" />
     <Compile Include="CaptchaExtensions.cs" />
+    <Compile Include="DirectBitmap.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RandomThreadSafe.cs" />
   </ItemGroup>

@@ -15,7 +15,7 @@ namespace LightMvcCaptcha.Web.ViewModels
         public uint LineNoiseCount { get; set; } = Core.Captcha.LineNoiseCount;
         public bool WaveDistortionEnabled { get; set; } = Core.Captcha.WaveDistortionEnabled;
         public bool LineNoiseEnabled { get; set; } = Core.Captcha.LineNoiseEnabled;
-
+        
         [Captcha(ErrorMessage = "Wrong captcha")]
         public string Captcha { get; set; }
     }
