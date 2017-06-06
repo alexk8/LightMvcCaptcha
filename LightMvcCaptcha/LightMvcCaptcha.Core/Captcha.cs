@@ -27,6 +27,9 @@ namespace LightMvcCaptcha.Core
 
         // PUBLIC STATIC VARIABLES:
 
+        /// <summary>
+        /// Shortcut for generating random color using Random class instance
+        /// </summary>
         public static Func<Random, Color> RandomColorFunction { get; } =
             rnd => Color.FromArgb(rnd.Next(256), rnd.Next(256), rnd.Next(256));
 
@@ -181,6 +184,8 @@ namespace LightMvcCaptcha.Core
         /// <param name="waveDistortionPeriod">Wave distortion algorithm period multiplier, in percents</param>
         /// <param name="lineNoiseEnabled">Enables or disables using line noise</param>
         /// <param name="lineNoiseCount">Sets the number of lines that will be drawn</param>
+        /// <param name="ellipseNoiseEnabled">Enables or disables using ellipse noise</param>
+        /// <param name="ellipseNoiseCount">The number of ellipses that will be drawn</param>
         /// <returns>Captcha</returns>
         public static Captcha Generate(Font font, string chars, uint length, uint charsSpacing,
             uint maxRotationAngle, bool waveDistortionEnabled, uint waveDistortionAmplitude,
