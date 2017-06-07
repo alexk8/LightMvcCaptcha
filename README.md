@@ -17,7 +17,7 @@ You need to perform 5 simple steps to embed LightMvcCaptcha to your project
 2. Inherit any Controller from `CaptchaController` abstract class:<br>
 `public class MyController : CaptchaController`
 <br><br>
-3. Set attribute `[Captcha]` for any *string* type property in your viewmodel, for e.g. "YourProperty":<br>
+3. Set attribute `[Captcha]` for any *string* type property in your viewmodel, e.g. "YourProperty":<br>
 `[Captcha(ErrorMessage = "Wrong captcha")]`<br>
 `public string YourProperty { get; set; }`
 <br><br>
@@ -50,26 +50,26 @@ Here is full list of static setting in **LightMvcCaptcha.Core.Captcha** class:
 1. `EllipseNoiseEnabled`: Enables or disables using ellipse noise
 1. `EllipseNoiseCount`: The number of ellipses that will be drawn
 1. `BackgroundColor`: The background color of the captcha.
+1. `HighQuality`: Sets Graphics class in high quality draw mode. 20% slower
 
 If you want to change them just replace default values inside your **Global.asax -> Application_Start**<br>
 ## Lets focus on events:
 There are 3 events (also static):
 * `BeforeCaptchaDrawEvent`: This event will be called right AFTER filling captcha with BackgroundColor and BEFORE drawing key<br>
-`public static event Action<Graphics, Random, Size> BeforeCaptchaDrawEvent;`
+`public static event Action<DirectBitmap, Random> BeforeCaptchaDrawEvent;`
 <br><br>
 * `AfterCaptchaDrawEvent`: This event will be called right AFTER drawing key and BEFORE line noise or wave distortion algorithms<br>
-`public static event Action<Graphics, Random, Size> AfterCaptchaDrawEvent;`
+`public static event Action<DirectBitmap, Random> AfterCaptchaDrawEvent;`
 <br><br>
 * `CaptchaCreatedEvent`: This event will be called right AFTER line noise or wave distortion algorithms<br>
-`public static event Action<Graphics, Random, Size> CaptchaCreatedEvent;`
+`public static event Action<DirectBitmap, Random> CaptchaCreatedEvent;`
 <br><br>
 ### Parameters:
-`Graphics`: For drawing of couse, you dont need to dispose it after use<br>
+`DirectBitmap`: Use is for drawing thru *Bitmap* property or directly change bits with *Bits* property<br>
 `Random`: Thread-safe instance of Random class, use them for any randomization stuff<br>
-`Size`: To know the dimmensions of bitmap that `Graphics` parameter use<br>
 <br>
 You can use them as you want: to add some custom graphic noise or whatever<br>
-All changes should be placed in **Global.asax -> Application_Start**
+All those stuff should be placed in **Global.asax -> Application_Start**
 ## Functions
 There are 3 algorithms that backed into captcha generation:
 1. **Wave Distortion**: transforms image to create wave-effect
