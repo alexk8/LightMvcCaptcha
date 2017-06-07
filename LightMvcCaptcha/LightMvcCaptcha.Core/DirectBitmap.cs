@@ -14,10 +14,23 @@ namespace LightMvcCaptcha.Core
     /// </summary>
     public class DirectBitmap : IDisposable
     {
+        /// <summary>
+        /// Just a simple Bitmap
+        /// </summary>
         public Bitmap Bitmap { get; private set; }
+        /// <summary>
+        /// Array that represents Bitmap property to get access to point use: Bits[x + y * Width], where (x,y) - some point
+        /// Int32 is in PixelFormat.Format32bppPArgb encoded color
+        /// </summary>
         public Int32[] Bits { get; private set; }
         public bool Disposed { get; private set; }
+        /// <summary>
+        /// The Height of Bitmap
+        /// </summary>
         public int Height { get; private set; }
+        /// <summary>
+        /// The Width of Bitmap
+        /// </summary>
         public int Width { get; private set; }
 
         protected GCHandle BitsHandle { get; private set; }
