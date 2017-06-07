@@ -13,17 +13,17 @@ namespace LightMvcCaptcha.Core
         /// <summary>
         /// This event will be called right AFTER filling captcha with BackgroundColor and BEFORE drawing key
         /// </summary>
-        public static event Action<Graphics, Random, Size> BeforeCaptchaDrawEvent;
+        public static event Action<DirectBitmap, Random> BeforeCaptchaDrawEvent;
 
         /// <summary>
         /// This event will be called right AFTER drawing key and BEFORE line noise or wave distortion algorithms
         /// </summary>
-        public static event Action<Graphics, Random, Size> AfterCaptchaDrawEvent;
+        public static event Action<DirectBitmap, Random> AfterCaptchaDrawEvent;
 
         /// <summary>
         /// This event will be called right AFTER line noise or wave distortion algorithms
         /// </summary>
-        public static event Action<Graphics, Random, Size> CaptchaCreatedEvent;
+        public static event Action<DirectBitmap, Random> CaptchaCreatedEvent;
 
         // PUBLIC STATIC VARIABLES:
 
@@ -56,7 +56,7 @@ namespace LightMvcCaptcha.Core
         /// <summary>
         /// The distance between characters in pixels
         /// </summary>
-        public static uint CharsSpacing { get; set; } = (uint)(Font.Size*0.8);
+        public static uint CharsSpacing { get; set; } = 45;
 
         /// <summary>
         /// Maximum rotation angle (-angle, angle) for each character.
@@ -100,6 +100,10 @@ namespace LightMvcCaptcha.Core
         /// </summary>
         public static uint EllipseNoiseCount { get; set; } = 10;
 
+        /// <summary>
+        /// Sets Graphics class in high quality draw mode. 20% slower
+        /// </summary>
+        public static bool HighQuality { get; set; } = true;
 
         /// <summary>
         /// The background color of the captcha. If you want to draw smth as background use BeforeCaptchaDrawEvent
@@ -168,7 +172,7 @@ namespace LightMvcCaptcha.Core
             return Generate(Font, Chars, Length, CharsSpacing,
                 MaxRotationAngle, WaveDistortionEnabled, WaveDistortionAmplitude,
                 WaveDistortionPeriod, LineNoiseEnabled, LineNoiseCount, 
-                EllipseNoiseEnabled, EllipseNoiseCount);
+                EllipseNoiseEnabled, EllipseNoiseCount, HighQuality);
         }
 
         /// <summary>
@@ -186,27 +190,29 @@ namespace LightMvcCaptcha.Core
         /// <param name="lineNoiseCount">Sets the number of lines that will be drawn</param>
         /// <param name="ellipseNoiseEnabled">Enables or disables using ellipse noise</param>
         /// <param name="ellipseNoiseCount">The number of ellipses that will be drawn</param>
+        /// <param name="highQuality">Sets Graphics class in high quality draw mode. 20% slower</param>
         /// <returns>Captcha</returns>
         public static Captcha Generate(Font font, string chars, uint length, uint charsSpacing,
             uint maxRotationAngle, bool waveDistortionEnabled, uint waveDistortionAmplitude,
             uint waveDistortionPeriod, bool lineNoiseEnabled, uint lineNoiseCount,
-            bool ellipseNoiseEnabled, uint ellipseNoiseCount)
+            bool ellipseNoiseEnabled, uint ellipseNoiseCount, bool highQuality)
         {
             string key = GetRandomString(chars, length);
+            SizeF wSize = MeasureStringSize(font, "W", highQuality); // as the most wide letter in most fonts
 
-            DirectBitmap captcha = new DirectBitmap((int) (key.Length * charsSpacing * 1.15f),
-                CalculateHeight(font, chars));
+            DirectBitmap captcha = new DirectBitmap((int) ((length-1) * charsSpacing + wSize.Width),
+                (int)(wSize.Height*0.85));
 
-            CreateDigits(captcha, key, font, charsSpacing, maxRotationAngle, ellipseNoiseEnabled, ellipseNoiseCount);
+            CreateDigits(captcha, key, font, charsSpacing, maxRotationAngle,
+                ellipseNoiseEnabled, ellipseNoiseCount, highQuality);
 
             if (lineNoiseEnabled)
-                DrawLineNoise(captcha, lineNoiseCount);
+                DrawLineNoise(captcha, lineNoiseCount, highQuality);
 
             if (waveDistortionEnabled)
                 WaveTransform(ref captcha, waveDistortionPeriod, waveDistortionAmplitude);
 
-            using (var g = Graphics.FromImage(captcha.Bitmap))
-                CaptchaCreatedEvent?.Invoke(g, RandomThreadSafe.Instance, captcha.Bitmap.Size);
+            CaptchaCreatedEvent?.Invoke(captcha, RandomThreadSafe.Instance);
 
             var size = new Size(captcha.Width, captcha.Height);
 
@@ -222,13 +228,35 @@ namespace LightMvcCaptcha.Core
             return new Captcha(captchaBytes, size, key);
         }
 
-        private static int CalculateHeight(Font font, string text)
+        /// <summary>
+        /// Creates graphics instance
+        /// </summary>
+        /// <param name="bitmap">Original bitmap</param>
+        /// <param name="highQuality">Activates high quality drawing mode</param>
+        /// <returns>Graphics</returns>
+        public static Graphics CreateGraphics(Bitmap bitmap, bool highQuality)
+        {
+            Graphics g = Graphics.FromImage(bitmap);
+
+            if (highQuality)
+            {
+                g.CompositingQuality = CompositingQuality.HighQuality;
+                g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                g.SmoothingMode = SmoothingMode.HighQuality;
+                g.PixelOffsetMode = PixelOffsetMode.HighQuality;
+                g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
+            }
+
+            return g;
+        }
+
+        private static SizeF MeasureStringSize(Font font, string text, bool highQuality)
         {
             using (var image = new Bitmap(1, 1))
             {
-                using (var g = Graphics.FromImage(image))
+                using (var g = CreateGraphics(image, highQuality))
                 {
-                    return (int)g.MeasureString(text, font).Height;
+                    return g.MeasureString(text, font);
                 }
             }
         }
@@ -247,7 +275,7 @@ namespace LightMvcCaptcha.Core
             for (int x = 0; x < img.Width; x++)
                 for (int y = 0; y < img.Height; y++)
                 {
-                    int _x = Math.Max(Math.Min(Convert.ToInt32(x + (A * Math.Sin(2.0 * Math.PI * y * F))), img.Width - 1), 0);
+                    int _x = Math.Max(Math.Min(Convert.ToInt32(Math.Round(x + (A * Math.Sin(2.0 * Math.PI * y * F)))), img.Width - 1), 0);
                     int _y = y;
 
                     transImg.Bits[_x + _y * img.Width] = img.Bits[x + y * img.Width];
@@ -268,13 +296,13 @@ namespace LightMvcCaptcha.Core
         }
 
         private static void CreateDigits(DirectBitmap img, string captcha, Font font, uint charsSpacing, 
-            uint maxRotationAngle, bool ellipseNoiseEnabled, uint ellipseNoiseCount)
+            uint maxRotationAngle, bool ellipseNoiseEnabled, uint ellipseNoiseCount, bool highQuality)
         {
-            using (Graphics g = Graphics.FromImage(img.Bitmap))
+            using (Graphics g = CreateGraphics(img.Bitmap, highQuality))
             {
                 g.Clear(BackgroundColor);
 
-                BeforeCaptchaDrawEvent?.Invoke(g, RandomThreadSafe.Instance, img.Bitmap.Size);
+                BeforeCaptchaDrawEvent?.Invoke(img, RandomThreadSafe.Instance);
 
                 if (ellipseNoiseEnabled)
                     DrawEllipseNoise(img, g, ellipseNoiseCount);
@@ -304,14 +332,14 @@ namespace LightMvcCaptcha.Core
                         brush.Dispose();
                     }
                 }
-
-                AfterCaptchaDrawEvent?.Invoke(g, RandomThreadSafe.Instance, img.Bitmap.Size);
             }
+
+            AfterCaptchaDrawEvent?.Invoke(img, RandomThreadSafe.Instance);
         }
 
-        private static void DrawLineNoise(DirectBitmap img, uint count)
+        private static void DrawLineNoise(DirectBitmap img, uint count, bool highQuality)
         {
-            using (Graphics g = Graphics.FromImage(img.Bitmap))
+            using (Graphics g = CreateGraphics(img.Bitmap, highQuality))
             {
                 for (int i = 0; i < count; i++)
                 {

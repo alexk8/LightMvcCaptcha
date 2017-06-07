@@ -63,6 +63,9 @@
             @Html.TextBoxFor(x => x.EllipseNoiseEnabled)
             @Html.DisplayNameFor(x => x.EllipseNoiseCount)
             @Html.TextBoxFor(x => x.EllipseNoiseCount)
+            
+            @Html.DisplayNameFor(x => x.HighQuality)
+            @Html.TextBoxFor(x => x.HighQuality)
         </div>
         <div>
             @Html.CaptchaFor(x => x.Captcha)
@@ -92,6 +95,7 @@
     Captcha.LineNoiseEnabled = @Model.LineNoiseEnabled.ToString().ToLower();  
     Captcha.EllipseNoiseEnabled = @Model.EllipseNoiseEnabled.ToString().ToLower();
     Captcha.EllipseNoiseCount = @Model.EllipseNoiseCount;
+    Captcha.HighQuality = @Model.HighQuality;
     </pre>
     </div>
 </body>

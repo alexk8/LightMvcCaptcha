@@ -58,7 +58,7 @@ namespace LightMvcCaptcha.Web.Controllers
             var captcha = Captcha.Generate(new Font(c.FontFamily, c.FontSize), c.Chars, c.Length,
                 c.CharsSpacing, c.MaxRotationAngle, c.WaveDistortionEnabled, c.WaveDistortionAmplitude,
                 c.WaveDistortionPeriod, c.LineNoiseEnabled, c.LineNoiseCount, c.EllipseNoiseEnabled, 
-                c.EllipseNoiseCount);
+                c.EllipseNoiseCount, c.HighQuality);
 
             Session["CAPTCHA"] = captcha;
 
