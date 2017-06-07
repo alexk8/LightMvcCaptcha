@@ -20,9 +20,11 @@
     </style>
 </head>
 <body>
+    <h1>LightMvcCaptcha</h1>
+    <h2>Github: <a href="https://github.com/cygwin255/LightMvcCaptcha">https://github.com/cygwin255/LightMvcCaptcha</a></h2>
     @if (TempData["Answer"] != null)
     {
-        <h1>Answer : @TempData["Answer"]</h1>
+        <h2>@TempData["Answer"]</h2>
     }
     @using (Html.BeginForm())
     {
@@ -30,7 +32,7 @@
         <p>Click @Html.ActionLink("here", "Reset") to reset your settings</p>
         <div>
             @Html.DisplayNameFor(x => x.Chars)
-            @Html.TextBoxFor(x => x.Chars, new { style = "width:400px" })
+            @Html.TextBoxFor(x => x.Chars, new { style = "width:400px"} )
 
             @Html.DisplayNameFor(x => x.FontFamily)
             @Html.TextBoxFor(x => x.FontFamily)
