@@ -1,8 +1,13 @@
 # LightMvcCaptcha
 Fully customizable highspeed captcha for asp.net mvc<br>
 Captcha image generation speed is about 215 captchas per second or ~4.5 milliseconds per single one. *Tested on 2.5 Ghz cpu, single thread mode*<br>
-Here you can test it: [captcha.cygwin255.ml](http://captcha.cygwin255.ml) and deside do you need it or not :)
-
+Here you can test it: [captcha.cygwin255.ml](http://captcha.cygwin255.ml) and deside do you need it or not :)<br>
+Some examples of  what you can achive (you could be able to change any aspect of captcha):
+![1](https://raw.githubusercontent.com/cygwin255/Utilities/master/Images/Captcha/1.jpg)<br>
+![2](https://raw.githubusercontent.com/cygwin255/Utilities/master/Images/Captcha/2.jpg)<br>
+![3](https://raw.githubusercontent.com/cygwin255/Utilities/master/Images/Captcha/3.jpg)<br>
+![4](https://raw.githubusercontent.com/cygwin255/Utilities/master/Images/Captcha/4.jpg)<br>
+![5](https://raw.githubusercontent.com/cygwin255/Utilities/master/Images/Captcha/5.jpg)
 ## How to use?
 You need to perform 5 simple steps to embed LightMvcCaptcha to your project
 1. Add a nuget package *OR compile it and add dll to your project by yourself*:<br>
