@@ -28,6 +28,7 @@ namespace LightMvcCaptcha.SpeedTest
             float persecond = 1000f / speed;
 
             Console.WriteLine($"Total speed: {speed} ms., or {persecond} per second");
+            Console.ReadKey();
         }
     }
 }

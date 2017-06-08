@@ -182,7 +182,7 @@ namespace LightMvcCaptcha.Core
         /// <param name="chars">List of characters that will be used to generate the captcha</param>
         /// <param name="length">The number of characters in the captcha</param>
         /// <param name="charsSpacing">The distance between characters in pixels</param>
-        /// <param name="maxRotationAngle">Maximum rotation angle (-angle, angle) for each character.</param>
+        /// <param name="maxRotationAngle">Maximum rotation angle (-angle, angle) for each character</param>
         /// <param name="waveDistortionEnabled">Enables or disables using Wave distortion algorithm</param>
         /// <param name="waveDistortionAmplitude">Wave distortion algorithm amplitude multiplier, in percents</param>
         /// <param name="waveDistortionPeriod">Wave distortion algorithm period multiplier, in percents</param>
@@ -278,7 +278,7 @@ namespace LightMvcCaptcha.Core
                     int _x = Math.Max(Math.Min(Convert.ToInt32(Math.Round(x + (A * Math.Sin(2.0 * Math.PI * y * F)))), img.Width - 1), 0);
                     int _y = y;
 
-                    transImg.Bits[_x + _y * img.Width] = img.Bits[x + y * img.Width];
+                    transImg.Bits[x + y * img.Width] = img.Bits[_x + _y * img.Width];
                 }
 
             img.Dispose();
