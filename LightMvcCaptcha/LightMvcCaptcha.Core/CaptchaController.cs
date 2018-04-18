@@ -1,29 +1,41 @@
-﻿using System;
-using System.Drawing.Imaging;
-using System.IO;
-using System.Web;
-using System.Web.Mvc;
+﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 
 namespace LightMvcCaptcha.Core
 {
-    public abstract class CaptchaController : Controller
+    public static class AppBuilderExtension
     {
-        public virtual FileStreamResult GetCaptcha()
+        public static void UseCaptcha(this IApplicationBuilder app, string path= "/captcha-image")
         {
-            var captcha = Captcha.Generate();
-
-            Session["CAPTCHA"] = captcha;
-
-            var ms = new MemoryStream(captcha.Image);
-            captcha.DisposeImage();
-
-            Response.Cache.SetExpires(DateTime.UtcNow.AddDays(-1));
-            Response.Cache.SetValidUntilExpires(false);
-            Response.Cache.SetRevalidation(HttpCacheRevalidation.AllCaches);
-            Response.Cache.SetCacheability(HttpCacheability.NoCache);
-            Response.Cache.SetNoStore();
-
-            return new FileStreamResult(ms, "image/jpeg");
+            CaptchaMiddleware.CaptchaPath = path;
+            app.UseWhen(
+                ctx => ctx.Request.Path == CaptchaMiddleware.CaptchaPath,
+                bld => { bld.UseMiddleware<CaptchaMiddleware>(); }
+                );
         }
     }
+
+    public class CaptchaMiddleware
+    {
+        //private readonly RequestDelegate _next;
+        public CaptchaMiddleware(RequestDelegate _next)
+        {
+            //this._next = _next;
+        }
+
+        public static string CaptchaPath;
+        public async Task Invoke(HttpContext context)
+        {
+            Captcha captcha = Captcha.Generate();
+            context.Session.SetString("CAPTCHA", captcha.Key);
+            context.Response.Headers.Add("Content-Type", "image/jpeg");
+            context.Response.ContentLength = captcha.Image.Length;
+            await context.Response.Body.WriteAsync(captcha.Image, 0, captcha.Image.Length);
+            captcha.DisposeImage();
+        }
+
+
+    }
+
 }

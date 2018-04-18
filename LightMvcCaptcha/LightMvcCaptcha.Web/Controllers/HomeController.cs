@@ -1,77 +1,25 @@
-﻿using System;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.IO;
-using System.Web;
-using System.Web.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using AspNetCoreWebTest.Models;
 using LightMvcCaptcha.Core;
-using LightMvcCaptcha.Web.ViewModels;
 
-namespace LightMvcCaptcha.Web.Controllers
+namespace AspNetCoreWebTest.Controllers
 {
-    public class HomeController : CaptchaController
+    public class HomeController : Controller
     {
-        private CaptchaViewModel captchaViewModel
+        [HttpGet]
+        public IActionResult Index()
         {
-            get
-            {
-                var cpt = Session["captchaViewModel"] as CaptchaViewModel;
-                if (cpt == null)
-                    Session["captchaViewModel"] = cpt = new CaptchaViewModel();
-                return cpt;
-            }
-            set { Session["captchaViewModel"] = value; }
-        }
-
-
-        public ActionResult Index()
-        {
-            return View(captchaViewModel);
+            return View();
         }
 
         [HttpPost]
-        public ActionResult Index(CaptchaViewModel model)
+        [Captcha("captchacode" , "sorry, try again")]
+        public IActionResult Index(TestCaptchaModel model)
         {
-            Font font = new Font(model.FontFamily, model.FontSize); // forcing creating default font if FontFamily is not correct
-            model.FontFamily = font.FontFamily.Name;
-            captchaViewModel = model;
-
-            if (ModelState.IsValid)
-            {
-                TempData["Answer"] = "Correct! " + model.Captcha;
-            }
-
-            return RedirectToAction("Index");
+            if (!ModelState.IsValid) return View(model);
+            ViewData["message"] = "success";
+            return View();
         }
 
-        public ActionResult Reset()
-        {
-            captchaViewModel = new CaptchaViewModel();
-
-            return RedirectToAction("Index");
-        }
-
-        //Replacing CaptchaController's GetCaptcha because we dont want to use static settings for captcha
-        public override FileStreamResult GetCaptcha()
-        {
-            var c = captchaViewModel;
-            var captcha = Captcha.Generate(new Font(c.FontFamily, c.FontSize), c.Chars, c.Length,
-                c.CharsSpacing, c.MaxRotationAngle, c.WaveDistortionEnabled, c.WaveDistortionAmplitude,
-                c.WaveDistortionPeriod, c.LineNoiseEnabled, c.LineNoiseCount, c.EllipseNoiseEnabled, 
-                c.EllipseNoiseCount, c.HighQuality);
-
-            Session["CAPTCHA"] = captcha;
-
-            var ms = new MemoryStream(captcha.Image);
-            captcha.DisposeImage();
-
-            Response.Cache.SetExpires(DateTime.UtcNow.AddDays(-1));
-            Response.Cache.SetValidUntilExpires(false);
-            Response.Cache.SetRevalidation(HttpCacheRevalidation.AllCaches);
-            Response.Cache.SetCacheability(HttpCacheability.NoCache);
-            Response.Cache.SetNoStore();
-
-            return new FileStreamResult(ms, "image/jpeg");
-        }
     }
 }

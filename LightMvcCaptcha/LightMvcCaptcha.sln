@@ -1,13 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.27428.2037
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LightMvcCaptcha.Core", "LightMvcCaptcha.Core\LightMvcCaptcha.Core.csproj", "{AD511177-24D5-45BA-B544-1F28E5B4C03A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LightMvcCaptcha.Web", "LightMvcCaptcha.Web\LightMvcCaptcha.Web.csproj", "{2C9B7294-9B2C-4084-A981-2B9ADC8011E0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LightMvcCaptcha.Web", "LightMvcCaptcha.Web\LightMvcCaptcha.Web.csproj", "{9A01C4EB-998C-4C11-9C60-580EEE6D73D6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LightMvcCaptcha.Core", "LightMvcCaptcha.Core\LightMvcCaptcha.Core.csproj", "{8C9F58FE-8E4B-498F-9377-545C22138807}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LightMvcCaptcha.SpeedTest", "LightMvcCaptcha.SpeedTest\LightMvcCaptcha.SpeedTest.csproj", "{826A6A49-B040-4CB0-8CC7-B9366EFC973A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LightMvcCaptcha.SpeedTest", "LightMvcCaptcha.SpeedTest\LightMvcCaptcha.SpeedTest.csproj", "{8B23FD42-C638-45B6-8A92-B47A819A33A9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,20 +15,23 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{AD511177-24D5-45BA-B544-1F28E5B4C03A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AD511177-24D5-45BA-B544-1F28E5B4C03A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{AD511177-24D5-45BA-B544-1F28E5B4C03A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AD511177-24D5-45BA-B544-1F28E5B4C03A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9A01C4EB-998C-4C11-9C60-580EEE6D73D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9A01C4EB-998C-4C11-9C60-580EEE6D73D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9A01C4EB-998C-4C11-9C60-580EEE6D73D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9A01C4EB-998C-4C11-9C60-580EEE6D73D6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{826A6A49-B040-4CB0-8CC7-B9366EFC973A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{826A6A49-B040-4CB0-8CC7-B9366EFC973A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{826A6A49-B040-4CB0-8CC7-B9366EFC973A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{826A6A49-B040-4CB0-8CC7-B9366EFC973A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2C9B7294-9B2C-4084-A981-2B9ADC8011E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2C9B7294-9B2C-4084-A981-2B9ADC8011E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2C9B7294-9B2C-4084-A981-2B9ADC8011E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2C9B7294-9B2C-4084-A981-2B9ADC8011E0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8C9F58FE-8E4B-498F-9377-545C22138807}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8C9F58FE-8E4B-498F-9377-545C22138807}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8C9F58FE-8E4B-498F-9377-545C22138807}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8C9F58FE-8E4B-498F-9377-545C22138807}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8B23FD42-C638-45B6-8A92-B47A819A33A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8B23FD42-C638-45B6-8A92-B47A819A33A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8B23FD42-C638-45B6-8A92-B47A819A33A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8B23FD42-C638-45B6-8A92-B47A819A33A9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A107AF5E-5547-4EEE-881A-D55F7A38E403}
 	EndGlobalSection
 EndGlobal

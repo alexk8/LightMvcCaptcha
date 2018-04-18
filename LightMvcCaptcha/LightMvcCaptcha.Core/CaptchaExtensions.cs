@@ -1,8 +1,14 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Html;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Mvc.Routing;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Microsoft.AspNetCore.Routing;
+using System;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Web.Mvc;
-using System.Web.Routing;
+using System.Net.Http;
+using System.Text.Encodings.Web;
 
 namespace LightMvcCaptcha.Core
 {
@@ -14,37 +20,16 @@ namespace LightMvcCaptcha.Core
         /// <param name="expression">Property with CaptchaAttribute</param>
         /// <param name="htmlAttributes">HTML attributes that will be applied to generated html code</param>
         /// <returns></returns>
-        public static MvcHtmlString CaptchaFor<TModel, TValue>(this HtmlHelper<TModel> html,
+        public static IHtmlContent CaptchaFor<TModel, TValue>(this IHtmlHelper<TModel> html,
             Expression<Func<TModel, TValue>> expression, object htmlAttributes = null)
         {
-            var memberExpression = expression.Body as MemberExpression;
-
-            if (memberExpression == null)
-                throw new InvalidOperationException("Expression must be a member expression");
-
-            bool usesCaptchaAttribute = memberExpression.Member.GetCustomAttributes(typeof(CaptchaAttribute), true).Any();
-
-            if (!usesCaptchaAttribute)
-                throw new InvalidOperationException("Expression member must be with CaptchaAttribute");
-
-            var controllerName = typeof(TModel).Assembly.GetTypes()
-                .Where(type => typeof(CaptchaController).IsAssignableFrom(type))
-                .Select(type => type.Name.Replace("Controller", ""))
-                .FirstOrDefault();
-
-            if (controllerName == null)
-                throw new InvalidOperationException("No controller that inherits from CaptchaController was found");
-
-            var urlHelper = new UrlHelper(html.ViewContext.RequestContext);
-            var url = urlHelper.RouteUrl(new {controller = controllerName, action = "GetCaptcha"});
-
+            MemberExpression memberExpression = expression.Body as MemberExpression
+                ?? throw new InvalidOperationException("Expression must be a member expression");
             TagBuilder tag = new TagBuilder("img");
-
             if (htmlAttributes != null) tag.MergeAttributes(new RouteValueDictionary(htmlAttributes));
-            tag.Attributes.Add("src", url);
-            tag.Attributes.Add("onclick", "this.src+=''");
-
-            return MvcHtmlString.Create(tag.ToString(TagRenderMode.SelfClosing));
+            tag.Attributes.Add("src", CaptchaMiddleware.CaptchaPath);
+            tag.Attributes.Add("onclick",  "this.src+=''");
+            return tag.RenderSelfClosingTag();
         }
     }
 }

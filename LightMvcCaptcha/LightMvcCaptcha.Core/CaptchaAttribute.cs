@@ -1,27 +1,37 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
-using System.Web;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Filters;
+using System;
+     
 
 namespace LightMvcCaptcha.Core
 {
-    [AttributeUsage(AttributeTargets.Property)]
-    public class CaptchaAttribute : ValidationAttribute
+    [AttributeUsage(AttributeTargets.Method)]
+    public class CaptchaAttribute : Attribute, IActionFilter
     {
-        public CaptchaAttribute()
+        public bool IsReusable => true;
+
+        string propName;
+        string message;
+        public CaptchaAttribute(string propName,string message)
         {
-            
+            this.propName = propName;
+            this.message = message;
         }
 
-        public override bool IsValid(object value)
+        public void OnActionExecuting(ActionExecutingContext context)
         {
-            string key = value as string;
-            Captcha captcha = HttpContext.Current.Session["CAPTCHA"] as Captcha;
+            string actual   = context.HttpContext.Request.Form[propName];
+            string expected = context.HttpContext.Session.GetString("CAPTCHA");
+            context.HttpContext.Session.Remove("CAPTCHA");
 
-            bool result = key != null && captcha != null && string.Equals(captcha.Key, key, Captcha.Comparison);
-
-            HttpContext.Current.Session["CAPTCHA"] = null;
-
-            return result;
+            if (actual == null || expected == null || !string.Equals(actual, expected, Captcha.Comparison))
+                context.ModelState.AddModelError(propName, message);
         }
+
+        public void OnActionExecuted(ActionExecutedContext context)
+        {
+        }
+
+
     }
 }
