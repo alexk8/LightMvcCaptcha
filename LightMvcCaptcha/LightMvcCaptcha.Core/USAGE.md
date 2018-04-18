@@ -1,4 +1,4 @@
-﻿STARTUP
+﻿## STARTUP.cs
 
         public void ConfigureServices(IServiceCollection services)
         {
@@ -11,7 +11,7 @@
             app.UseCaptcha("/captcha-image");
 		}
 
-CONTROLLER
+## CONTROLLER
         [HttpPost]
         [Captcha("captchacode" , "sorry, try again")]
         public IActionResult Index(TestCaptchaModel model)
@@ -20,7 +20,7 @@ CONTROLLER
             //success,continue processing
         }
 
-VIEW
+## VIEW
 	@using LightMvcCaptcha.Core
     
 	<form method="post">
